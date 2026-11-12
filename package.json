@@ -1,0 +1,13 @@
+{
+	"name": "flockfall",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "node tools/test.mjs",
+		"fmt": "stylua src tests tools"
+	},
+	"devDependencies": {
+		"@johnnymorganz/stylua-bin": "2.6.0",
+		"@luau-rs/luau": "0.739.0"
+	}
+}
