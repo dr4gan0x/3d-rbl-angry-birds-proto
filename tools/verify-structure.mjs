@@ -119,6 +119,7 @@ const ALLOWLIST = [
 	path.join("docs", "superpowers", "specs"),
 	path.join("docs", "superpowers", "plans"),
 	path.join("docs", "ASSETS.md"),
+	path.join("docs", "PLAYTEST.md"),
 	"Skills",
 ];
 const scannedText = [
