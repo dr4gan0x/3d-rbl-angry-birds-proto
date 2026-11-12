@@ -5,7 +5,6 @@
 -- Boylece bir karede 20 temas 20 ayri guncelleme yerine 1 guncelleme olur.
 -- Hedef parcalarin sagligini SUNUCU tutar; istemci sadece gorsel alir.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -13,11 +12,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("config")
 local Core = Shared:WaitForChild("core")
 
-local GameConfig = require(Config:WaitForChild("GameConfig"))
 local Materials = require(Config:WaitForChild("Materials"))
 local DamageModel = require(Core:WaitForChild("DamageModel"))
 local DamageQueue = require(Core:WaitForChild("DamageQueue"))
-local ScoreModel = require(Core:WaitForChild("ScoreModel"))
 
 local DamageService = {}
 

@@ -1,0 +1,48 @@
+return function(T)
+	local RoundLoadout = T.require("RoundLoadout")
+
+	T.describe("RoundLoadout", function()
+		T.it("kopya uzerinde calisir, kaynagi bozmaz", function()
+			local source = { "Wren", "Swallow", "Puffin" }
+			local loadout = RoundLoadout.new(source)
+			loadout:take()
+			loadout:take()
+			T.expect(#source):toBe(3)
+			T.expect(source[1]):toBe("Wren")
+		end)
+
+		T.it("peek siradaki kusu verir, tuketmez", function()
+			local loadout = RoundLoadout.new({ "Wren", "Swallow" })
+			T.expect(loadout:peek()):toBe("Wren")
+			T.expect(loadout:peek()):toBe("Wren")
+			T.expect(loadout:remaining()):toBe(2)
+		end)
+
+		T.it("take kusu tuketir ve dondurur", function()
+			local loadout = RoundLoadout.new({ "Wren", "Swallow" })
+			T.expect(loadout:take()):toBe("Wren")
+			T.expect(loadout:remaining()):toBe(1)
+			T.expect(loadout:peek()):toBe("Swallow")
+		end)
+
+		T.it("bos loadout take nil verir", function()
+			local loadout = RoundLoadout.new({})
+			T.expect(loadout:take()):toBe(nil)
+			T.expect(loadout:remaining()):toBe(0)
+		end)
+
+		T.it("bitince peek son kusu tekrar etmez", function()
+			local loadout = RoundLoadout.new({ "Wren" })
+			loadout:take()
+			T.expect(loadout:peek()):toBe(nil)
+		end)
+
+		T.it("reset baslangica doner", function()
+			local loadout = RoundLoadout.new({ "Wren", "Swallow" })
+			loadout:take()
+			loadout:reset()
+			T.expect(loadout:remaining()):toBe(2)
+			T.expect(loadout:peek()):toBe("Wren")
+		end)
+	end)
+end

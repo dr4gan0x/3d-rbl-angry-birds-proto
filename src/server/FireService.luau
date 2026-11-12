@@ -8,7 +8,6 @@
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("config")
@@ -17,7 +16,7 @@ local Core = Shared:WaitForChild("core")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local Kinematics = require(Core:WaitForChild("Kinematics"))
 local RateLimiter = require(Core:WaitForChild("RateLimiter"))
-local Remotes = require(Shared:WaitForChild("Remotes"))
+local RoundLoadout = require(Core:WaitForChild("RoundLoadout"))
 
 export type BirdSpec = {
 	kind: string,
@@ -50,6 +49,7 @@ local FireService = {}
 
 local limiters: { [Player]: any } = {}
 local currentLevel: any = nil
+local loadout: any = nil
 local slingshotOrigin: Vector3 = Vector3.new(0, 6, 0)
 local onBirdFired: ((Player, BasePart, BirdSpec) -> ())? = nil
 local activeBird: BasePart? = nil
@@ -105,53 +105,74 @@ function FireService.configure(level: any, onFired: ((Player, BasePart, BirdSpec
 	)
 	onBirdFired = onFired
 	limiters = {}
-	activeBird = nil
+	loadout = RoundLoadout.new(level.loadout)
+	FireService.clearActiveBird()
 end
 
 function FireService.activeBird(): BasePart?
 	return activeBird
 end
 
+-- Ucus bitti: yeni atisa izin vermek icin referansi birak.
+function FireService.clearActiveBird(): ()
+	activeBird = nil
+end
+
+function FireService.remainingBirds(): number
+	if loadout == nil then
+		return 0
+	end
+	return loadout:remaining()
+end
+
+-- Atis kabul edildiginde siradaki kusu tuketir (state machine ile ayni adimda).
+function FireService.consumeBird(): ()
+	if loadout ~= nil then
+		loadout:take()
+	end
+end
+
 -- Sunucu tarafi dogrulama: tip -> aralik -> frekans -> sira -> kus var mi.
-function FireService.handleFire(player: Player, power: any, yaw: any, pitch: any): boolean
+function FireService.handleFire(player: Player, power: any, yaw: any, pitch: any): string?
 	if type(power) ~= "number" or type(yaw) ~= "number" or type(pitch) ~= "number" then
-		return false
+		return nil
 	end
 	-- NaN ve sonsuz degerleri reddet.
 	if power ~= power or yaw ~= yaw or pitch ~= pitch then
-		return false
+		return nil
 	end
 	if
 		math.abs(power) == math.huge
 		or math.abs(yaw) == math.huge
 		or math.abs(pitch) == math.huge
 	then
-		return false
+		return nil
 	end
 	if power < 0 or power > 1 then
-		return false
+		return nil
 	end
 	if math.abs(yaw) > math.pi + 0.001 or math.abs(pitch) > math.pi / 2 + 0.001 then
-		return false
+		return nil
 	end
 	if currentLevel == nil then
-		return false
+		return nil
 	end
 
 	local limiter = ensureLimiter(player)
 	if not limiter:allow(os.clock()) then
-		return false
+		return nil
 	end
 
 	if activeBird ~= nil and activeBird.Parent ~= nil then
-		return false -- onceki kus hala havada
+		return nil -- onceki kus hala havada
 	end
 
-	local birdType = currentLevel.loadout[1] or "Wren"
+	local birdType = (loadout and loadout:peek()) or "Wren"
 	local velocity = Kinematics.launchVelocity(power, yaw, pitch, GameConfig.MAX_SPEED)
 	local vector = Vector3.new(velocity.x, velocity.y, velocity.z)
+	FireService.consumeBird()
 	spawnBird(player, birdType, vector)
-	return true
+	return birdType
 end
 
 -- Ucus yetenegi: Swallow hiz patlamasi, Puffin patlama.
@@ -222,19 +243,15 @@ function FireService.start(remotes: any): ()
 	limiters = {}
 	remotes.FireRequest.OnServerEvent:Connect(
 		function(player: Player, power: any, yaw: any, pitch: any)
-			local ok = false
+			local firedType: string? = nil
 			local success, err = pcall(function()
-				ok = FireService.handleFire(player, power, yaw, pitch)
+				firedType = FireService.handleFire(player, power, yaw, pitch)
 			end)
 			if not success then
 				warn("[FireService] atis hatasi: " .. tostring(err))
 			end
-			if ok then
-				remotes.ShotFired:FireAllClients(
-					player,
-					currentLevel and currentLevel.loadout[1],
-					slingshotOrigin
-				)
+			if firedType ~= nil then
+				remotes.ShotFired:FireAllClients(player, firedType, slingshotOrigin)
 			end
 		end
 	)

@@ -8,7 +8,6 @@
 -- Kamera BindToRenderStep ile guncellenir (Heartbeat'te degil): render
 -- sirasinda calisir, titreme olmaz.
 
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 

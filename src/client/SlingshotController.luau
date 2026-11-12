@@ -12,7 +12,6 @@
 
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("config")
@@ -20,12 +19,9 @@ local Core = Shared:WaitForChild("core")
 
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local AimModel = require(Core:WaitForChild("AimModel"))
-local Remotes = require(Shared:WaitForChild("Remotes"))
 
 local CameraRig = require(script.Parent:WaitForChild("CameraRig"))
 local TrajectoryPreview = require(script.Parent:WaitForChild("TrajectoryPreview"))
-
-local ACTIVE_PHASES = { aiming = true, flying = false, settling = false, won = false, lost = false }
 
 local SlingshotController = {}
 

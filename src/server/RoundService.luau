@@ -16,7 +16,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("config")
 local Core = Shared:WaitForChild("core")
 
-local GameConfig = require(Config:WaitForChild("GameConfig"))
 local Levels = require(Shared:WaitForChild("levels"))
 local BuildService = require(script.Parent:WaitForChild("BuildService"))
 local DamageService = require(script.Parent:WaitForChild("DamageService"))
@@ -143,10 +142,12 @@ function RoundService.start(remoteSet: any): ()
 			if bird == nil or bird.Parent == nil then
 				state:notifyLanded()
 				settling = true
+				FireService.clearActiveBird()
 				publish(buildPayload())
 			elseif bird.AssemblyLinearVelocity.Magnitude < 4 and bird.Position.Y < 40 then
 				state:notifyLanded()
 				settling = true
+				FireService.clearActiveBird()
 				publish(buildPayload())
 			end
 		elseif state.phase == "settling" then
@@ -156,13 +157,9 @@ function RoundService.start(remoteSet: any): ()
 				lastPhase = phase
 				publish(buildPayload())
 				if phase == "aiming" then
-					-- Sonraki kusu hazirla: yuku bir kaydir.
-					local level = currentLevel()
-					table.remove(level.loadout, 1)
-					if #level.loadout == 0 then
-						level.loadout = { "Wren" }
-					end
-					FireService.configure(level)
+					-- FireService kus sirasini kendi kopyasinda tutar; paylasilan
+					-- level tablosunu DEGISTIRMEYIZ (ikinci oynayista bozulurdu).
+					FireService.clearActiveBird()
 				end
 			end
 		end

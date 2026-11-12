@@ -62,15 +62,12 @@ return function(T)
 
 		T.it("ayni id iki kez hata", function()
 			local def = base()
-			table.insert(
-				def.pieces,
-				{
-					id = "w1",
-					material = "Wood",
-					size = { x = 2, y = 2, z = 2 },
-					position = { x = 20, y = 1, z = -30 },
-				}
-			)
+			table.insert(def.pieces, {
+				id = "w1",
+				material = "Wood",
+				size = { x = 2, y = 2, z = 2 },
+				position = { x = 20, y = 1, z = -30 },
+			})
 			local _, errors = LevelSchema.validate(def, GameConfig, Materials)
 			T.expect(contains(errors, "duplicate_piece_id:w1")):toBeTrue()
 		end)
@@ -105,15 +102,12 @@ return function(T)
 
 		T.it("cakisan parcalar hata", function()
 			local def = base()
-			table.insert(
-				def.pieces,
-				{
-					id = "w2",
-					material = "Wood",
-					size = { x = 2, y = 2, z = 2 },
-					position = { x = 0, y = 1, z = -30 },
-				}
-			)
+			table.insert(def.pieces, {
+				id = "w2",
+				material = "Wood",
+				size = { x = 2, y = 2, z = 2 },
+				position = { x = 0, y = 1, z = -30 },
+			})
 			local _, errors = LevelSchema.validate(def, GameConfig, Materials)
 			T.expect(contains(errors, "overlapping_pieces:w1:w2")):toBeTrue()
 		end)
