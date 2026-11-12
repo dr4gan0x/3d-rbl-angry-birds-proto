@@ -1,0 +1,7 @@
+node_modules/
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+sourcemap.json
+.superpowers/
